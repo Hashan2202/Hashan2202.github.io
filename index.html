@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>බ/ කහටරුප්ප මහා විද්‍යාලය - ගුරු නිවාඩු කළමනාකරණ පද්ධතිය</title>
+  <meta name="description" content="බ/ කහටරුප්ප මහා විද්‍යාලය පාසලේ ගුරුභවතුන් සඳහා වූ පූර්ණ නිවාඩු අයදුම්, අනුමත කිරීම්, ආවරණ රාජකාරි (Relief) සහ නිවාඩු වාර්තා කළමනාකරණ පද්ධතිය.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gemunu+Libre:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Gemunu Libre', system-ui, sans-serif; }
+    body.bg-slate-50{background:radial-gradient(1100px 480px at 8% -10%,#d1fae5 0,transparent 60%),radial-gradient(900px 400px at 100% 0,#fef3c7 0,transparent 55%),#f8fafc !important}
+    header{backdrop-filter:blur(10px)}
+    .bg-white.rounded-2xl{box-shadow:0 10px 30px -14px rgba(6,78,59,.35)!important;transition:box-shadow .2s}
+    .tab-btn{border-radius:9999px!important;padding:.4rem 1rem!important;transition:all .2s;white-space:nowrap}
+    tbody tr{transition:background .15s}
+    thead{background:linear-gradient(90deg,#ecfdf5,#f8fafc)!important}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(16,185,129,.25);border-color:#10b981!important}
+    .qa-btn{position:relative;display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.8rem .4rem;border-radius:1rem;background:#fff;border:1px solid #a7f3d0;font-weight:700;font-size:.72rem;color:#064e3b;box-shadow:0 6px 16px -10px rgba(6,78,59,.5);transition:all .2s;text-align:center}
+    .qa-btn:hover{transform:translateY(-3px);background:linear-gradient(135deg,#059669,#047857);color:#fff;border-color:transparent}
+    .qa-btn .ic{font-size:1.5rem;line-height:1}
+    .qa-btn.locked::after{content:'🔒';position:absolute;top:4px;right:6px;font-size:.62rem}
+    .chip{display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    section:not(.hidden){animation:fadeUp .35s ease}
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+    }
+    #schoolLoginGate{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#022c22,#064e3b 55%,#0f172a);display:flex;align-items:center;justify-content:center;padding:20px}
+    #schoolLoginGate.hidden{display:none}
+    .login-card{width:min(480px,100%);background:white;border-radius:28px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+    .login-card input,.login-card select{width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:14px;margin-top:6px;outline:none}
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+  <div id="schoolLoginGate">
+    <div class="login-card">
+      <div class="text-center mb-6">
+        <div class="text-5xl mb-2">🏫</div>
+        <h2 class="text-2xl font-black text-slate-900">පාසල් නිවාඩු කළමනාකරණ පද්ධතිය</h2>
+        <p class="text-xs text-slate-500 mt-1">Multi-School Login · දැනට පවතින දත්ත ආරක්ෂා කර ඇත</p>
+      </div>
+      <div class="space-y-4">
+        <div><label class="text-xs font-bold text-slate-700">පාසල</label><select id="schoolLoginSelect"></select></div>
+        <div><label class="text-xs font-bold text-slate-700">ගුරු සේවා අංකය</label><input id="teacherLoginService" placeholder="සේවා අංකය" autocomplete="off"></div>
+        <button onclick="schoolTeacherLogin()" class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-2xl font-black">ගුරු ලෙස පිවිසෙන්න</button>
+        <button onclick="schoolPrincipalLogin()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black">👑 විදුහල්පති පිවිසුම</button>
+        <div class="border-t pt-4"><button onclick="openNewSchoolSetup()" class="w-full py-2.5 border border-emerald-300 text-emerald-800 rounded-2xl font-bold">➕ නව පාසලක් ලියාපදිංචි කරන්න</button></div>
+        <p class="text-[10px] text-slate-400 text-center">මෙය standalone/local version එකකි. වෙනත් phones අතර real-time data සඳහා Firebase connect කිරීම අවශ්‍ය වේ.</p>
+      </div>
+    </div>
+  </div>
+  <div id="newSchoolModal" class="fixed inset-0 bg-black/60 z-[110] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4">
+      <h3 class="text-lg font-black">නව පාසලක් ලියාපදිංචි කරන්න</h3>
+      <input id="newSchoolSi" class="w-full p-3 border rounded-xl" placeholder="පාසලේ නම (සිංහල)">
+      <input id="newSchoolEn" class="w-full p-3 border rounded-xl" placeholder="School name (English)">
+      <input id="newSchoolCensus" class="w-full p-3 border rounded-xl" placeholder="සංගණන අංකය">
+      <div class="flex gap-2"><button onclick="closeNewSchoolSetup()" class="flex-1 py-2.5 border rounded-xl font-bold">අවලංගු</button><button onclick="createNewSchoolLocal()" class="flex-1 py-2.5 bg-emerald-700 text-white rounded-xl font-bold">සාදන්න</button></div>
+    </div>
+  </div>
+
+  <header class="bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 font-bold text-xl shadow-inner">🏫</div>
+        <div>
+          <div class="text-[11px] font-bold text-amber-300 tracking-wider uppercase">ශ්‍රී ලංකා රජයේ පාසල් නිවාඩු කළමනාකරණ පද්ධතිය</div>
+          <h1 class="text-lg md:text-xl font-black text-white tracking-tight">බ/ කහටරුප්ප මහා විද්‍යාලය</h1>
+          <div class="text-[11px] text-emerald-200">BD/ Kahataruppa Maha Vidyalaya · සංගණන අංකය: 08124</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="inline-flex items-center gap-1.5 bg-emerald-900/90 text-amber-200 border border-emerald-700 px-3 py-1 rounded-full text-xs font-bold shadow-xs">
+          <span>⏰</span>
+          <span>සවස 6:00 ස්වයංක්‍රීය Reset සක්‍රියයි</span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-xl text-xs">
+          <span class="text-slate-400">ගුරුභවතා:</span>
+          <select id="userSelector" class="bg-transparent text-white font-semibold cursor-pointer outline-none"></select>
+        </div>
+        <button onclick="openApplyModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all">
+          <span>✍️</span>
+          <span>නිවාඩු අයදුම් කරන්න</span>
+        </button>
+        <button id="principalAuthBtn" onclick="togglePrincipalAuth()" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl text-xs shadow-md transition-all"></button>
+      </div>
+    </div>
+    <nav class="bg-slate-950/70 border-t border-slate-800 px-4">
+      <div class="max-w-7xl mx-auto flex gap-1 overflow-x-auto text-xs py-1.5">
+        <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn px-3 py-1.5 rounded-lg font-bold bg-emerald-700 text-white">📊 උපකරණ පුවරුව (Dashboard)</button>
+        <button onclick="switchTab('review')" id="tabBtn-review" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-slate-300 hover:text-white hover:bg-slate-800">👑 විදුහල්පති අනුමත කිරීම්</button>
+        <button onclick="switchTab('relief')" id="tabBtn-relief" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-slate-300 hover:text-white hover:bg-slate-800">📋 ආවරණ රාජකාරි (Relief)</button>
+        <button onclick="switchTab('staff')" id="tabBtn-staff" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-slate-300 hover:text-white hover:bg-slate-800">👥 ගුරු මණ්ඩලය (<span class="staffCount">40</span>)</button>
+        <button onclick="switchTab('reports')" id="tabBtn-reports" class="tab-btn px-3 py-1.5 rounded-lg font-bold text-slate-300 hover:text-white hover:bg-slate-800">📑 නිල වාර්තා & G-35</button>
+      </div>
+    </nav>
+  </header>
+
+  <div id="toastContainer" class="fixed top-20 right-5 z-50 flex flex-col gap-2"></div>
+
+  <div class="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 text-white shadow-md">
+    <div id="approvedBannerInner" class="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-2 flex-wrap"></div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+    <div id="userProfileCard" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm"></div>
+
+    <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+      <button class="qa-btn" onclick="openApplyModal()"><span class="ic">✍️</span>නිවාඩු අයදුම්</button>
+      <button class="qa-btn" data-p onclick="switchTab('review')"><span class="ic">👑</span>නිවාඩු අනුමත</button>
+      <button class="qa-btn" onclick="switchTab('relief')"><span class="ic">📋</span>ආවරණ රාජකාරි</button>
+      <button class="qa-btn" onclick="switchTab('staff')"><span class="ic">👥</span>ගුරු මණ්ඩලය</button>
+      <button class="qa-btn" data-p onclick="openAddTeacherModal()"><span class="ic">➕</span>ගුරුවරයෙක් එක් කරන්න</button>
+      <button class="qa-btn" data-p onclick="switchTab('staff');showToast('✏️ ගුරුවරයෙකුගේ පේළියේ ✏️ සංස්කරණය ඔබන්න')"><span class="ic">✏️</span>ගුරු විස්තර සංස්කරණය</button>
+      <button class="qa-btn" onclick="switchTab('reports')"><span class="ic">📑</span>වාර්තා & G-35</button>
+      <button class="qa-btn" onclick="window.print()"><span class="ic">🖨️</span>මුද්‍රණය</button>
+      <button class="qa-btn" data-p onclick="changePin()"><span class="ic">🔑</span>PIN වෙනස් කරන්න</button>
+      <button class="qa-btn" data-p onclick="forceResetLeaves()"><span class="ic">🔄</span>දෛනික Reset</button>
+    </div>
+
+    <section id="view-dashboard" class="space-y-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-semibold">අද දින නිවාඩු අයදුම්</div>
+          <div id="metricTodayLeaves" class="text-2xl font-black text-slate-900 mt-1">0</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-semibold">අනුමත කළ අයදුම්පත්</div>
+          <div id="metricApprovedLeaves" class="text-2xl font-black text-emerald-600 mt-1">0</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-semibold">අනුමැතිය අපේක්ෂිත</div>
+          <div id="metricPendingLeaves" class="text-2xl font-black text-amber-600 mt-1">0</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-semibold">ආවරණ රාජකාරි (Relief)</div>
+          <div id="metricReliefDuties" class="text-2xl font-black text-blue-600 mt-1">0</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-900">දෛනික නිවාඩු අයදුම්පත් ලැයිස්තුව</h2>
+          <button onclick="forceResetLeaves()" class="text-xs text-slate-500 hover:text-rose-600 underline">දැන්ම බිංදුව කරන්න (6:00 PM Reset)</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-3">අයදුම් අංකය</th>
+                <th class="p-3">ගුරුභවතා</th>
+                <th class="p-3">නිවාඩු වර්ගය</th>
+                <th class="p-3">දිනයන්</th>
+                <th class="p-3">හේතුව</th>
+                <th class="p-3">තත්ත්වය</th>
+                <th class="p-3 text-right">ක්‍රියාමාර්ග</th>
+              </tr>
+            </thead>
+            <tbody id="leavesTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-review" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">👑 විදුහල්පති නිවාඩු අනුමත කිරීමේ ද්වාරය</h2>
+            <p class="text-xs text-slate-500">ගුරුභවතුන් විසින් ඉදිරිපත් කරන ලද නිවාඩු අයදුම්පත් පරීක්ෂා කර අනුමත කිරීම හෝ ප්‍රතික්ෂේප කිරීම.</p>
+          </div>
+        </div>
+        <div id="pendingReviewCards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </section>
+
+    <section id="view-relief" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold text-slate-900">📋 ආවරණ රාජකාරි (Relief Duty Management)</h2>
+        <p class="text-xs text-slate-500">නිවාඩු ලබාගත් ගුරුභවතුන්ගේ කාලපරිච්ඡේද ආවරණය කිරීම සඳහා නිදහස් ගුරුවරුන් පැවරීම.</p>
+        <div id="reliefCardsContainer" class="space-y-4"></div>
+      </div>
+    </section>
+
+    <section id="view-staff" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">👥 පාසල් ගුරු මණ්ඩලය (<span class="staffCount">40</span> දෙනෙකුගේ නාමලේඛනය)</h2>
+            <p class="text-xs text-slate-500">බ/ කහටරුප්ප මහා විද්‍යාලය - ශ්‍රී ලංකා රජයේ නිල ගුරු මණ්ඩලය 2026</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <input type="text" id="staffSearchInput" oninput="filterStaffTable()" placeholder="ගුරු නම හෝ අංකය සොයන්න..." class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs w-56">
+            <button id="addTeacherBtn" onclick="openAddTeacherModal()" class="hidden px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm">➕ නව ගුරුවරයෙක් එක් කරන්න</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-3">අංකය</th>
+                <th class="p-3">නම</th>
+                <th class="p-3">තනතුර / අංශය</th>
+                <th class="p-3">අනියම් (21)</th>
+                <th class="p-3">ලෙඩ (20)</th>
+                <th class="p-3">ඉතිරි ශේෂය</th>
+                <th id="staffActionTh" class="p-3 text-right hidden">ක්‍රියාමාර්ග</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-reports" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">📑 රජයේ නිල G-35 නිවාඩු ආකෘතිය සහ වාර්තා</h2>
+            <p class="text-xs text-slate-500">ශ්‍රී ලංකා අධ්‍යාපන අමාත්‍යාංශයේ ආකෘති පත්‍ර අනුව මුද්‍රණය කළ හැකි වාර්තා.</p>
+          </div>
+          <button onclick="window.print()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm">🖨️ සම්පූර්ණ වාර්තාව මුද්‍රණය කරන්න (Print)</button>
+        </div>
+        <div id="reportsContainer" class="space-y-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="applyModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">නව නිවාඩු අයදුම්පතක් ඉදිරිපත් කිරීම</h3>
+          <p class="text-xs text-slate-500">ශ්‍රී ලංකා රජයේ G-35 ආකෘතිය අනුව</p>
+        </div>
+        <button onclick="closeApplyModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+      <form id="applyLeaveForm" onsubmit="handleApplyLeave(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">අයදුම්කරු (ගුරුභවතා):</label>
+          <select id="leaveFormStaffSelect" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">��ිවාඩු වර්ගය:</label>
+            <select id="leaveTypeSelect" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+              <option value="casual">අනියම් නිවාඩු (Casual - 21)</option>
+              <option value="medical">විවේක/ලෙඩ නිවාඩු (Medical - 20)</option>
+              <option value="duty">රාජකාරි නිවාඩු (Duty Leave)</option>
+              <option value="half_day">අර්ධ දින (Half Day)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">දින ගණන:</label>
+            <input type="number" id="leaveDaysInput" value="1" min="0.5" max="21" step="0.5" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">ආරම්භක දිනය:</label>
+            <input type="date" id="leaveStartDateInput" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">අවසාන දිනය:</label>
+            <input type="date" id="leaveEndDateInput" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">නිවාඩු ගැනීමට හේතුව:</label>
+          <textarea id="leaveReasonInput" rows="2" placeholder="පෞද්ගලික හදිසි අවශ්‍යතාවයක් සඳහා..." required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">වැඩ ආවරණය කරන ගුරුභවතා (Relief):</label>
+          <select id="reliefTeacherSelect" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none"></select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeApplyModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-bold">අවලංගු කරන්න</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-md">අයදුම්පත යවන්න</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="loginModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">👑 විදුහල්පති පිවිසුම</h3>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">නිවාඩු අනුමත කිරීම සහ ගුරුවරුන් එක් කිරීම/ඉවත් කිරීම සඳහා රහස් අංකය (PIN) ඇතුළත් කරන්න.</p>
+      <form onsubmit="handlePrincipalLogin(event)" class="space-y-3 text-xs">
+        <input type="password" id="loginPinInput" inputmode="numeric" autocomplete="off" required placeholder="PIN අංකය" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none text-center tracking-widest text-base">
+        <div id="loginError" class="hidden text-rose-600 font-semibold"></div>
+        <button type="submit" class="w-full py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold">පිවිසෙන්න</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="addTeacherModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 id="teacherModalTitle" class="text-base font-bold text-slate-900">➕ නව ගුරුවරයෙක් ඇතුළත් කිරීම</h3>
+        <button onclick="closeAddTeacherModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+      <form onsubmit="handleAddTeacher(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="editTId">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold text-slate-700 mb-1">නම (සිංහල) *</label><input id="newTNameSi" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"></div>
+          <div><label class="block font-semibold text-slate-700 mb-1">Name (English)</label><input id="newTNameEn" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold text-slate-700 mb-1">සේවා අංකය *</label><input id="newTServiceNo" required placeholder="උදා: TS-41" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"></div>
+          <div><label class="block font-semibold text-slate-700 mb-1">දුරකථන</label><input id="newTPhone" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold text-slate-700 mb-1">තනතුර</label><input id="newTDesignation" value="ගුරු" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"></div>
+          <div><label class="block font-semibold text-slate-700 mb-1">අංශය</label><input id="newTSection" placeholder="උදා: Primary" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"></div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeAddTeacherModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-bold">අවලංගු</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold"><span id="teacherSubmitLabel">එක් කරන්න</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
+    බ/ කහටරුප්ප මහා විද්‍යාලය · පාසල් නිවාඩු කළමනාකරණ පද්ධතිය © 2026 · ශ්‍රී ලංකා අධ්‍යාපන අමාත්‍යාංශ මාර්ගෝපදේශ අනුව නිර්මාණය කරන ලදී.
+  </footer>
+
+  <script>
+    const INITIAL_STAFF = [
+      {"id":"staff-2","serviceNo":"TS-02","nameSinhala":"එන්. එච්. භද්‍රා කුමාරි මිය","nameEnglish":"Ms. N. H. Bhadra Kumari","role":"principal","designationSinhala":"විදුහල්පතිනි (ශ්‍රී ලංකා අධ්‍යාපන පරිපාලන සේවය - SLEAS)","designationEnglish":"Principal (SLEAS)","section":"Administration","subjects":[],"phone":"071-4829101","email":"bhadrakumari.nh@kahataruppa.sch.lk","appointmentDate":"2018-01-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[]},
+      {"id":"staff-3","serviceNo":"TS-03","nameSinhala":"එස්. වී. එන්. සේපාලිකා මිය","nameEnglish":"Ms. S. V. N. Sepalika","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 1)","designationEnglish":"Teacher (SLTS 1)","section":"Junior Secondary","subjects":[],"phone":"077-3124503","email":"sepalika.svn@kahataruppa.sch.lk","appointmentDate":"2015-05-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,5]},
+      {"id":"staff-4","serviceNo":"TS-04","nameSinhala":"ඩී. එම්. ආර්. ඩී. දිසානායක මිය","nameEnglish":"Ms. D. M. R. D. Dissanayake","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Senior Secondary","subjects":[],"classInCharge":"10-A","phone":"071-8592304","email":"dissanayake.dmrd@kahataruppa.sch.lk","appointmentDate":"2016-06-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,4]},
+      {"id":"staff-5","serviceNo":"677031573V","nameSinhala":"ඩබ්. එම්. ලීලාවතී මිය","nameEnglish":"Ms. W. M. Leelawathi","role":"sectional_head","designationSinhala":"ප��‍රාථමික අංශ ප්‍රධානී / ආචාර්ය (SLTS 1)","designationEnglish":"Sectional Head / Teacher (SLTS 1)","section":"Primary","subjects":[],"classInCharge":"5-A","phone":"071-2345605","email":"leelawathi.wm@kahataruppa.sch.lk","appointmentDate":"2012-03-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,6]},
+      {"id":"staff-6","serviceNo":"TS-06","nameSinhala":"එස්. එම්. ඉන්දික සංජීව මයා","nameEnglish":"Mr. S. M. Indika Sanjeewa","role":"vice_principal","designationSinhala":"නියෝජ්‍ය විදුහල්පති (SLTS 1)","designationEnglish":"Vice Principal (SLTS 1)","section":"Administration","subjects":[],"phone":"077-9876506","email":"indika.sanjeewa@kahataruppa.sch.lk","appointmentDate":"2014-08-01","gender":"male","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,5]},
+      {"id":"staff-7","serviceNo":"TS-07","nameSinhala":"ඩී. එම්. රංජනී කුමාරි දිසානායක මිය","nameEnglish":"Ms. D. M. Ranjani Kumari Dissanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Junior Secondary","subjects":[],"classInCharge":"8-A","phone":"072-4589207","email":"ranjani.dm@kahataruppa.sch.lk","appointmentDate":"2017-02-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,7]},
+      {"id":"staff-8","serviceNo":"TS-08","nameSinhala":"ඩී. එම්. කල්‍යාණි උදයකුමාරි මිය","nameEnglish":"Ms. D. M. Kalyani Udayakumari","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Primary","subjects":[],"classInCharge":"4-A","phone":"071-9238408","email":"kalyani.dm@kahataruppa.sch.lk","appointmentDate":"2016-09-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,5]},
+      {"id":"staff-9","serviceNo":"TS-09","nameSinhala":"අයි. කේ. ලෝකේශ්වර මිය","nameEnglish":"Ms. I. K. Lokeshwara","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Senior Secondary","subjects":[],"classInCharge":"11-A","phone":"077-1234509","email":"lokeshwara.ik@kahataruppa.sch.lk","appointmentDate":"2018-04-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,6]},
+      {"id":"staff-10","serviceNo":"TS-10","nameSinhala":"ටී. එම්. ඩී. තෙන්නකෝන් මිය","nameEnglish":"Ms. T. M. D. Thennakoon","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Primary","subjects":[],"classInCharge":"3-A","phone":"071-5678910","email":"thennakoon.tmd@kahataruppa.sch.lk","appointmentDate":"2019-01-20","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,8]},
+      {"id":"staff-11","serviceNo":"TS-11","nameSinhala":"ආර්. එම්. ජයසේන මයා","nameEnglish":"Mr. R. M. Jayasena","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 1)","designationEnglish":"Teacher (SLTS 1)","section":"Senior Secondary","subjects":[],"phone":"076-2345611","email":"jayasena.rm@kahataruppa.sch.lk","appointmentDate":"2013-11-01","gender":"male","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,4]},
+      {"id":"staff-12","serviceNo":"TS-12","nameSinhala":"කේ. කේ. ආර්. පී. ධර්මසිරි මයා","nameEnglish":"Mr. K. K. R. P. Dharmasiri","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Junior Secondary","subjects":[],"classInCharge":"7-A","phone":"078-3456712","email":"dharmasiri.kkrp@kahataruppa.sch.lk","appointmentDate":"2016-03-01","gender":"male","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,5]},
+      {"id":"staff-13","serviceNo":"TS-13","nameSinhala":"එස්. වී. ජී. චන්ද්‍රකාන්ති මිය","nameEnglish":"Ms. S. V. G. Chandrakanthi","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Primary","subjects":[],"classInCharge":"2-A","phone":"071-9876513","email":"chandrakanthi.svg@kahataruppa.sch.lk","appointmentDate":"2015-08-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[4,7]},
+      {"id":"staff-14","serviceNo":"198160302148","nameSinhala":"ඩී. එම්. එස්. ආර්. දිසානායක මිය","nameEnglish":"Ms. D. M. S. R. Dissanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Junior Secondary","subjects":[],"classInCharge":"9-A","phone":"075-4567814","email":"dissanayaka.dmsr@kahataruppa.sch.lk","appointmentDate":"2017-09-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,6]},
+      {"id":"staff-15","serviceNo":"TS-15","nameSinhala":"ඩී. එම්. වසන්තා දිසානායක මිය","nameEnglish":"Ms. D. M. Wasantha Dissanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Primary","subjects":[],"classInCharge":"1-A","phone":"077-8765415","email":"wasantha.dm@kahataruppa.sch.lk","appointmentDate":"2016-04-18","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,7]},
+      {"id":"staff-16","serviceNo":"TS-16","nameSinhala":"ඩී. එම්. ගයානි දිසානායක මිය","nameEnglish":"Ms. D. M. Gayani Dissanayake","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Junior Secondary","subjects":[],"classInCharge":"6-A","phone":"071-3456716","email":"gayani.dm@kahataruppa.sch.lk","appointmentDate":"2019-07-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,4]},
+      {"id":"staff-17","serviceNo":"TS-17","nameSinhala":"කේ. ඩබ්. එස්. ජේ. ඩී. එම්. කේ. පී. සුභාෂිණී මිය","nameEnglish":"Ms. K. W. S. J. D. M. K. P. Subhashini","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Primary","subjects":[],"classInCharge":"2-B","phone":"077-2345617","email":"subhashini.kp@kahataruppa.sch.lk","appointmentDate":"2018-05-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,5]},
+      {"id":"staff-18","serviceNo":"TS-18","nameSinhala":"ඩී. එම්. සී. දිසානායක මිය","nameEnglish":"Ms. D. M. C. Dissanayake","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"Junior Secondary","subjects":[],"classInCharge":"8-B","phone":"071-7654318","email":"dissanayake.dmc@kahataruppa.sch.lk","appointmentDate":"2020-03-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,8]},
+      {"id":"staff-19","serviceNo":"TS-19","nameSinhala":"ආර්. එම්. එස්. පී. රත්නායක මිය","nameEnglish":"Ms. R. M. S. P. Rathnayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Senior Secondary","subjects":[],"phone":"077-5432119","email":"rathnayaka.rmsp@kahataruppa.sch.lk","appointmentDate":"2019-02-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,6]},
+      {"id":"staff-20","serviceNo":"TS-20","nameSinhala":"ඩී. එම්. එන්. ඩී. දිසානායක මිය","nameEnglish":"Ms. D. M. N. D. Dissanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Primary","subjects":[],"classInCharge":"1-B","phone":"078-9012320","email":"dissanayaka.dmnd@kahataruppa.sch.lk","appointmentDate":"2019-10-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[4,7]},
+      {"id":"staff-21","serviceNo":"TS-21","nameSinhala":"ආර්. එම්. බී. එස්. රත්නායක මිය","nameEnglish":"Ms. R. M. B. S. Rathnayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Senior Secondary","subjects":[],"classInCharge":"10-B","phone":"071-6543221","email":"rathnayaka.rmbs@kahataruppa.sch.lk","appointmentDate":"2018-09-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,5]},
+      {"id":"staff-22","serviceNo":"TS-22","nameSinhala":"ආර්. එම්. එස්. කේ. බණ්ඩාර මයා","nameEnglish":"Mr. R. M. S. K. Bandara","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Senior Secondary","subjects":[],"classInCharge":"11-B","phone":"070-1234522","email":"bandara.rmsk@kahataruppa.sch.lk","appointmentDate":"2017-06-01","gender":"male","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,6]},
+      {"id":"staff-23","serviceNo":"TS-23","nameSinhala":"ඩී. එම්. යූ. ඩබ්. දිසානායක මිය","nameEnglish":"Ms. D. M. U. W. Dissanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Junior Secondary","subjects":[],"phone":"077-4321023","email":"dissanayaka.dmuw@kahataruppa.sch.lk","appointmentDate":"2019-05-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,8]},
+      {"id":"staff-24","serviceNo":"TS-24","nameSinhala":"ඩබ්. එම්. ඩී. කේ. විජේසිංහ මිය","nameEnglish":"Ms. W. M. D. K. Wijesinghe","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Senior Secondary","subjects":[],"phone":"075-8901224","email":"wijesinghe.wmdk@kahataruppa.sch.lk","appointmentDate":"2018-08-20","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,5]},
+      {"id":"staff-25","serviceNo":"TS-25","nameSinhala":"කේ. ඒ. ජී. නිසංසලා මිය","nameEnglish":"Ms. K. A. G. Nisansala","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"A/L Science","subjects":[],"classInCharge":"12-Science","phone":"071-3210925","email":"nisansala.kag@kahataruppa.sch.lk","appointmentDate":"2021-02-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,7]},
+      {"id":"staff-26","serviceNo":"TS-26","nameSinhala":"ආර්. එම්. චාමිකා ජයමිණි මිය","nameEnglish":"Ms. R. M. Chamika Jayamini","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Junior Secondary","subjects":[],"classInCharge":"6-B","phone":"077-8901226","email":"chamika.jayamini@kahataruppa.sch.lk","appointmentDate":"2019-03-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,6]},
+      {"id":"staff-27","serviceNo":"TS-27","nameSinhala":"ඩබ්. එම්. ඩී. ඒ. විජේසිංහ මිය","nameEnglish":"Ms. W. M. D. A. Wijesinghe","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Primary","subjects":[],"classInCharge":"3-B","phone":"072-5678927","email":"wijesinghe.wmda@kahataruppa.sch.lk","appointmentDate":"2018-06-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,4]},
+      {"id":"staff-28","serviceNo":"TS-28","nameSinhala":"ඩී. එම්. ඒ. පී. දිසානායක මිය","nameEnglish":"Ms. D. M. A. P. Dissanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Senior Secondary","subjects":[],"phone":"071-4567828","email":"dissanayaka.dmap@kahataruppa.sch.lk","appointmentDate":"2019-11-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,8]},
+      {"id":"staff-29","serviceNo":"TS-29","nameSinhala":"එච්. ඒ. ඒ. අයි. කුලසුන්දර මිය","nameEnglish":"Ms. H. A. A. I. Kulasundara","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Junior Secondary","subjects":[],"phone":"076-7890129","email":"kulasundara.haai@kahataruppa.sch.lk","appointmentDate":"2018-12-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,5]},
+      {"id":"staff-30","serviceNo":"TS-30","nameSinhala":"ඩබ්. එම්. එස්. මධුෂානි මිය","nameEnglish":"Ms. W. M. S. Madushani","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"A/L Arts & Commerce","subjects":[],"classInCharge":"12-Commerce","phone":"077-3456730","email":"madushani.wms@kahataruppa.sch.lk","appointmentDate":"2020-09-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,6]},
+      {"id":"staff-31","serviceNo":"TS-31","nameSinhala":"එච්. එම්. යූ. සයුරිකා මිය","nameEnglish":"Ms. H. M. U. Sayurika","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"Primary","subjects":[],"classInCharge":"4-B","phone":"078-2345631","email":"sayurika.hmu@kahataruppa.sch.lk","appointmentDate":"2021-01-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[4,7]},
+      {"id":"staff-32","serviceNo":"TS-32","nameSinhala":"එච්. එම්. පී. මධුෂානි මිය","nameEnglish":"Ms. H. M. P. Madushani","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"Junior Secondary","subjects":[],"phone":"075-1234532","email":"madushani.hmp@kahataruppa.sch.lk","appointmentDate":"2020-08-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,7]},
+      {"id":"staff-33","serviceNo":"TS-33","nameSinhala":"එස්. ඩබ්. එම්. එන්. වීරවර්ණ මිය","nameEnglish":"Ms. S. W. M. N. Weerawarne","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Senior Secondary","subjects":[],"classInCharge":"11-C","phone":"071-8765433","email":"weerawarne.swmn@kahataruppa.sch.lk","appointmentDate":"2019-04-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,4]},
+      {"id":"staff-34","serviceNo":"TS-34","nameSinhala":"කේ. ඒ. එන්. දීපශිකා කළුආරච්චි මිය","nameEnglish":"Ms. K. A. N. Deepashika Kalu Arachchi","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Junior Secondary","subjects":[],"classInCharge":"7-B","phone":"077-6543234","email":"deepashika.kan@kahataruppa.sch.lk","appointmentDate":"2017-01-16","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,5]},
+      {"id":"staff-35","serviceNo":"TS-35","nameSinhala":"ආර්. එම්. ඩී. එන්. රත්නායක මිය","nameEnglish":"Ms. R. M. D. N. Rathnayake","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"A/L Science","subjects":[],"classInCharge":"13-Science","phone":"076-5432135","email":"rathnayake.rmdn@kahataruppa.sch.lk","appointmentDate":"2018-07-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,6]},
+      {"id":"staff-36","serviceNo":"TS-36","nameSinhala":"ජී. ජී. ටී. ඉෂානි හංසිකා මිය","nameEnglish":"Ms. G. G. T. Ishani Hansika","role":"teacher","designationSinhala":"ආචාරය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"A/L Science","subjects":[],"phone":"078-4321036","email":"ishani.ggt@kahataruppa.sch.lk","appointmentDate":"2021-03-20","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,5]},
+      {"id":"staff-37","serviceNo":"TS-37","nameSinhala":"එස්. එම්. යූ. නිලක්ෂි සඳනායක මිය","nameEnglish":"Ms. S. M. U. Nilakshi Sandanayaka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"A/L Science","subjects":[],"phone":"071-2345637","email":"nilakshi.smu@kahataruppa.sch.lk","appointmentDate":"2021-05-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[4,8]},
+      {"id":"staff-38","serviceNo":"TS-38","nameSinhala":"පී. පී. පී. රූපසිංහ මයා","nameEnglish":"Mr. P. P. P. Roopasinghe","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-I)","designationEnglish":"Teacher (SLTS 2-I)","section":"Senior Secondary","subjects":[],"phone":"077-7654338","email":"roopasinghe.ppp@kahataruppa.sch.lk","appointmentDate":"2015-10-01","gender":"male","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,7]},
+      {"id":"staff-39","serviceNo":"TS-39","nameSinhala":"කේ. ඒ. ක්‍රිෂානි දිනුකා මිය","nameEnglish":"Ms. K. A. Krishani Dinuka","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"A/L Arts & Commerce","subjects":[],"classInCharge":"12-Arts","phone":"070-9876539","email":"krishani.ka@kahataruppa.sch.lk","appointmentDate":"2020-11-01","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[3,5]},
+      {"id":"staff-40","serviceNo":"TS-40","nameSinhala":"ඩබ්. වී. එස්. දිල්රුක්ෂි වනුගසිංහ මිය","nameEnglish":"Ms. W. V. S. Dilrukshi Wanugasingha","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 2-II)","designationEnglish":"Teacher (SLTS 2-II)","section":"Junior Secondary","subjects":[],"classInCharge":"9-B","phone":"072-8765440","email":"dilrukshi.wvs@kahataruppa.sch.lk","appointmentDate":"2019-08-15","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[1,6]},
+      {"id":"staff-41","serviceNo":"TS-41","nameSinhala":"යූ. අයි. එම්. කලන්සූරිය මිය","nameEnglish":"Ms. U. I. M. Kalansoriya","role":"teacher","designationSinhala":"ආචාර්ය (SLTS 3-I)","designationEnglish":"Teacher (SLTS 3-I)","section":"Primary","subjects":[],"classInCharge":"5-B","phone":"078-7654341","email":"kalansoriya.uim@kahataruppa.sch.lk","appointmentDate":"2021-04-10","gender":"female","leaveBalance":{"casualTotal":21,"casualUsed":0,"medicalTotal":20,"medicalUsed":0,"dutyUsed":0,"shortLeaveUsedThisMonth":0},"freePeriodsToday":[2,5]}
+    ];
+    const SCHOOL_INFO = {"nameSinhala":"බ/ කහටරුප්ප මහා විද්‍යාලය","nameEnglish":"BD/ Kahataruppa Maha Vidyalaya","censusNo":"08124","zone":"පස්සර (Passara)","division":"පස්සර (Passara)","province":"ඌව පළාත (Uva Province)","academicYear":2026,"principalName":"එන්. එච්. භද්‍රා කුමාරි මිය (SLES)","term":"3rd Term"};
+
+    const MULTI_SCHOOL_KEY = 'multi_school_registry_v1';
+    const ACTIVE_SCHOOL_KEY = 'multi_school_active_v1';
+    const ACTIVE_TEACHER_KEY = 'multi_school_teacher_v1';
+    const defaultSchool = { id:'kahataruppa-08124', nameSinhala:'බ/ කහටරුප්ප මහා විද්‍යාලය', nameEnglish:'BD/ Kahataruppa Maha Vidyalaya', censusNo:'08124', builtin:true };
+    function getSchoolRegistry(){const saved=JSON.parse(localStorage.getItem(MULTI_SCHOOL_KEY)||'null'); if(saved && Array.isArray(saved) && saved.length) return saved; localStorage.setItem(MULTI_SCHOOL_KEY,JSON.stringify([defaultSchool])); return [defaultSchool];}
+    function renderSchoolLoginList(){const el=document.getElementById('schoolLoginSelect'); if(!el)return; el.innerHTML=getSchoolRegistry().map(s=>`<option value="${s.id}">${s.nameSinhala} · ${s.censusNo}</option>`).join('');}
+    function activeSchool(){const id=localStorage.getItem(ACTIVE_SCHOOL_KEY)||defaultSchool.id; return getSchoolRegistry().find(s=>s.id===id)||defaultSchool;}
+    function enterApp(){document.getElementById('schoolLoginGate').classList.add('hidden'); const s=activeSchool(); if(typeof SCHOOL_INFO!=='undefined' && s.id===defaultSchool.id){SCHOOL_INFO.nameSinhala=s.nameSinhala; SCHOOL_INFO.nameEnglish=s.nameEnglish; SCHOOL_INFO.censusNo=s.censusNo;}}
+    function schoolTeacherLogin(){const sid=document.getElementById('schoolLoginSelect').value; const service=document.getElementById('teacherLoginService').value.trim().toLowerCase(); localStorage.setItem(ACTIVE_SCHOOL_KEY,sid); if(sid===defaultSchool.id){const found=staffList.find(x=>String(x.serviceNo).toLowerCase()===service && x.role!=='principal'); if(!found){alert('මෙම පාසලේ එම සේවා අංකය හමු නොවීය.'); return;} currentUserId=found.id; localStorage.setItem(ACTIVE_TEACHER_KEY,found.id); saveState(); enterApp(); renderAll();} else {alert('මෙම නව පාසලට තවම ගුරු දත්ත එකතු කර නැත. පළමුව විදුහල්පති පිවිසුමෙන් ගුරු දත්ත එක් කරන්න.');}}
+    function schoolPrincipalLogin(){const sid=document.getElementById('schoolLoginSelect').value; localStorage.setItem(ACTIVE_SCHOOL_KEY,sid); enterApp(); openLoginModal();}
+    function openNewSchoolSetup(){document.getElementById('newSchoolModal').classList.remove('hidden'); document.getElementById('newSchoolModal').classList.add('flex');}
+    function closeNewSchoolSetup(){document.getElementById('newSchoolModal').classList.add('hidden'); document.getElementById('newSchoolModal').classList.remove('flex');}
+    function createNewSchoolLocal(){const si=document.getElementById('newSchoolSi').value.trim(), en=document.getElementById('newSchoolEn').value.trim(), c=document.getElementById('newSchoolCensus').value.trim(); if(!si||!en||!c){alert('පාසලේ නම සහ සංගණන අංකය ඇතුළත් කරන්න.'); return;} const list=getSchoolRegistry(); const id='school-'+Date.now(); list.push({id,nameSinhala:si,nameEnglish:en,censusNo:c,builtin:false}); localStorage.setItem(MULTI_SCHOOL_KEY,JSON.stringify(list)); renderSchoolLoginList(); document.getElementById('schoolLoginSelect').value=id; closeNewSchoolSetup(); alert('නව පාසල local system එකට එක් කළා. ගුරු දත්ත/real-time sharing සඳහා Firebase අවශ්‍යයි.');}
+    window.addEventListener('load',()=>{renderSchoolLoginList();});
+
+    const STORAGE_KEY_STAFF = 'standalone_school_staff_v1';
+    const STORAGE_KEY_LEAVES = 'standalone_school_leaves_v1';
+    const STORAGE_KEY_USER = 'standalone_school_user_v1';
+    const STORAGE_KEY_RESET = 'standalone_school_last_reset_v1';
+
+    let staffList = JSON.parse(localStorage.getItem(STORAGE_KEY_STAFF)) || INITIAL_STAFF;
+    let leavesList = JSON.parse(localStorage.getItem(STORAGE_KEY_LEAVES)) || [];
+    let currentUserId = localStorage.getItem(STORAGE_KEY_USER) || staffList[0].id;
+
+    window.getFirebaseState = function(){return { staffList, leavesList, currentUserId };};
+    window.applyFirebaseState = function(data){if(!data || !Array.isArray(data.staffList) || !Array.isArray(data.leavesList)) return; staffList=data.staffList; leavesList=data.leavesList; if(!staffList.length) return; if(!staffList.some(s => s.id===currentUserId)) currentUserId=staffList[0].id; localStorage.setItem(STORAGE_KEY_STAFF,JSON.stringify(staffList)); localStorage.setItem(STORAGE_KEY_LEAVES,JSON.stringify(leavesList)); localStorage.setItem(STORAGE_KEY_USER,currentUserId); renderAll();};
+
+    const STORAGE_KEY_PIN = 'standalone_school_pin_v2';
+    const SESSION_KEY_PRINCIPAL = 'standalone_school_principal_session';
+    function hashPin(p){let h=5381; for(const c of String(p)) h=((h<<5)+h+c.charCodeAt(0))>>>0; return h.toString(16);}
+    function getPinHash(){return localStorage.getItem(STORAGE_KEY_PIN) || hashPin('00000000');}
+    function isPrincipalLoggedIn(){return sessionStorage.getItem(SESSION_KEY_PRINCIPAL)==='1';}
+    function requirePrincipal(){if(isPrincipalLoggedIn()) return true; showToast('🔒 මෙය විදුහල්පතිනියට පමණක් අයත් ක්‍රියාවකි. කරුණාකර පිවිසෙන්න.'); openLoginModal(); return false;}
+    function openLoginModal(){document.getElementById('loginPinInput').value=''; document.getElementById('loginError').classList.add('hidden'); document.getElementById('loginModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('loginPinInput').focus(),50);}
+    function closeLoginModal(){document.getElementById('loginModal').classList.add('hidden');}
+    function handlePrincipalLogin(e){e.preventDefault(); const pin=document.getElementById('loginPinInput').value; if(hashPin(pin)===getPinHash()){sessionStorage.setItem(SESSION_KEY_PRINCIPAL,'1'); closeLoginModal(); showToast('✓ විදුහල්පතිනිය ලෙස පිවිසුණා.'); renderAll();} else {const err=document.getElementById('loginError'); err.textContent='PIN අංකය වැරදියි. නැවත උත්සාහ කරන්න.'; err.classList.remove('hidden');}}
+    function togglePrincipalAuth(){if(isPrincipalLoggedIn()){sessionStorage.removeItem(SESSION_KEY_PRINCIPAL); showToast('විදුහල්පති පිවිසුමෙන් ඉවත් වුණා.'); renderAll();} else openLoginModal();}
+    function changePin(){if(!requirePrincipal()) return; const np=prompt('නව PIN අංකය ඇතුළත් කරන්න (අවම අක්ෂර 4):'); if(np===null) return; if(np.length<4){alert('PIN අංකය අවම වශයෙන් අක්ෂර 4ක් විය යුතුයි.'); return;} localStorage.setItem(STORAGE_KEY_PIN, hashPin(np)); showToast('✓ PIN අංකය වෙනස් කරන ලදී.');}
+    function renderRoleUI(){const on=isPrincipalLoggedIn(); const btn=document.getElementById('principalAuthBtn'); btn.innerHTML = on ? '<span>👑</span><span>විදුහල්පති · ඉවත් වන්න</span>' : '<span>🔐</span><span>විදුහල්පති පිවිසුම</span>'; btn.className = 'flex items-center gap-1.5 px-3.5 py-1.5 font-bold rounded-xl text-xs shadow-md transition-all ' + (on ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-white'); document.getElementById('addTeacherBtn').classList.toggle('hidden', !on); document.getElementById('staffActionTh').classList.toggle('hidden', !on); document.querySelectorAll('.staffCount').forEach(el => el.textContent = staffList.length); document.querySelectorAll('.qa-btn[data-p]').forEach(b => b.classList.toggle('locked', !on));}
+
+    function openAddTeacherModal(){if(!requirePrincipal()) return; document.querySelectorAll('#addTeacherModal input').forEach(i => i.value=''); document.getElementById('newTDesignation').value='ගුරු'; document.getElementById('teacherModalTitle').textContent='➕ නව ගුරුවරයෙක් ඇතුළත් කිරීම'; document.getElementById('teacherSubmitLabel').textContent='එක් කරන්න'; document.getElementById('addTeacherModal').classList.remove('hidden');}
+    function closeAddTeacherModal(){document.getElementById('addTeacherModal').classList.add('hidden');}
+    function openEditTeacherModal(id){if(!requirePrincipal()) return; const t=staffList.find(x=>x.id===id); if(!t) return; document.getElementById('editTId').value=id; document.getElementById('newTNameSi').value=t.nameSinhala||''; document.getElementById('newTNameEn').value=t.nameEnglish||''; document.getElementById('newTServiceNo').value=t.serviceNo||''; document.getElementById('newTPhone').value=t.phone||''; document.getElementById('newTDesignation').value=t.designationSinhala||''; document.getElementById('newTSection').value=t.section||''; document.getElementById('teacherModalTitle').textContent='✏️ ගුරු විස්තර සංස්කරණය'; document.getElementById('teacherSubmitLabel').textContent='සුරකින්න'; document.getElementById('addTeacherModal').classList.remove('hidden');}
+    function handleAddTeacher(e){e.preventDefault(); if(!requirePrincipal()) return; const editId=document.getElementById('editTId').value; const serviceNo=document.getElementById('newTServiceNo').value.trim(); if(staffList.some(s => s.id !== editId && s.serviceNo.toLowerCase()===serviceNo.toLowerCase())){alert('මෙම සේවා අංකය දැනටමත් භාවිතා වේ.'); return;} const nameSi=document.getElementById('newTNameSi').value.trim(); const nameEn=document.getElementById('newTNameEn').value.trim() || nameSi; const designation=document.getElementById('newTDesignation').value.trim() || 'ගුරු'; const section=document.getElementById('newTSection').value.trim() || 'General'; const phone=document.getElementById('newTPhone').value.trim(); if(editId){const t=staffList.find(x=>x.id===editId); if(!t) return; Object.assign(t,{serviceNo,nameSinhala:nameSi,nameEnglish:nameEn,designationSinhala:designation,section,phone}); leavesList.forEach(l=>{if(l.staffId===editId) l.staffNameSinhala=nameSi; if(l.reliefStaffId===editId) l.reliefStaffName=nameSi;}); showToast('✓ '+nameSi+' ගේ විස්තර යාවත්කාලීන කරන ලදී.');} else {staffList.push({id:'staff-'+Date.now(),serviceNo,nameSinhala:nameSi,nameEnglish:nameEn,role:'teacher',designationSinhala:designation,designationEnglish:'Teacher',section,subjects:[],phone,email:'',appointmentDate:new Date().toISOString().split('T')[0],gender:'',leaveBalance:{casualTotal:21,casualUsed:0,medicalTotal:20,medicalUsed:0}}); showToast('✓ '+nameSi+' ගුරු මණ්ඩලයට එක් කරන ලදී.');} saveState(); closeAddTeacherModal(); renderAll();}
+    function removeTeacher(id){if(!requirePrincipal()) return; const t=staffList.find(s=>s.id===id); if(!t) return; if(t.role==='principal'){alert('විදුහල්පතිනියගේ ගිණුම ඉවත් කළ නොහැක.'); return;} if(!confirm(t.nameSinhala+' ගුරු මණ්ඩලයෙන් ඉවත් කිරීමට අවශ්‍යද?\n(ඔහුගේ/ඇයගේ පොරොත්තු නිවාඩු අයදුම්පත් ද ඉවත් වේ)')) return; staffList=staffList.filter(s=>s.id!==id); leavesList=leavesList.filter(l => !(l.staffId===id && l.status==='pending')); if(currentUserId===id) currentUserId=staffList[0].id; saveState(); showToast('✓ '+t.nameSinhala+' ඉවත් කරන ලදී.'); renderAll();}
+
+    function saveState(){localStorage.setItem(STORAGE_KEY_STAFF, JSON.stringify(staffList)); localStorage.setItem(STORAGE_KEY_LEAVES, JSON.stringify(leavesList)); localStorage.setItem(STORAGE_KEY_USER,currentUserId); if(window.firebaseCloudSync) window.firebaseCloudSync();}
+
+    function checkDaily6PMReset(){const now=new Date(); const currentHour=now.getHours(); const todayDateStr=now.toISOString().split('T')[0]; const lastResetDate=localStorage.getItem(STORAGE_KEY_RESET); if(currentHour >=18 && lastResetDate !== todayDateStr){leavesList=[]; localStorage.setItem(STORAGE_KEY_LEAVES, JSON.stringify([])); localStorage.setItem(STORAGE_KEY_RESET, todayDateStr); showToast('🔔 සවස 6:00 සම්පූර්ණ වූ බැවින් දෛනික නිවාඩු තොරතුරු ස්වයංක්‍රීයව බිංදුව කරන ලදී!'); renderAll();}}
+    function forceResetLeaves(){if(!requirePrincipal()) return; if(confirm('සියලු දෛනික නිවාඩු අයදුම්පත් බිංදුව කිරීමට අවශ්‍යද?')){leavesList=[]; saveState(); showToast('✓ නිවාඩු වාර්තා සාර්ථකව බිංදුව කරන ලදී.'); renderAll();}}
+    function showToast(message){const container=document.getElementById('toastContainer'); const toast=document.createElement('div'); toast.className='bg-slate-900 text-white border border-emerald-500/50 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 animate-bounce'; toast.innerHTML='<span>🔔</span><span>'+message+'</span>'; container.appendChild(toast); setTimeout(()=>toast.remove(),5000);}
+    function switchTab(tabName){['dashboard','review','relief','staff','reports'].forEach(t=>{const view=document.getElementById('view-'+t); const btn=document.getElementById('tabBtn-'+t); if(view) view.classList.toggle('hidden', t !== tabName); if(btn){if(t===tabName){btn.className='tab-btn px-3 py-1.5 rounded-lg font-bold bg-emerald-700 text-white';} else {btn.className='tab-btn px-3 py-1.5 rounded-lg font-bold text-slate-300 hover:text-white hover:bg-slate-800';}}});}
+    function renderUserSelector(){const select=document.getElementById('userSelector'); const modalSelect=document.getElementById('leaveFormStaffSelect'); const reliefSelect=document.getElementById('reliefTeacherSelect'); select.innerHTML=''; if(modalSelect) modalSelect.innerHTML=''; if(reliefSelect) reliefSelect.innerHTML=''; staffList.forEach(s=>{const opt=document.createElement('option'); opt.value=s.id; opt.textContent=(s.role==='principal'?'👑 ':'')+s.nameSinhala+' ('+s.serviceNo+')'; if(s.id===currentUserId) opt.selected=true; select.appendChild(opt); if(modalSelect){const opt2=opt.cloneNode(true); modalSelect.appendChild(opt2);} if(reliefSelect && s.id !== currentUserId){const opt3=document.createElement('option'); opt3.value=s.id; opt3.textContent=s.nameSinhala+' ('+(s.section||'General')+')'; reliefSelect.appendChild(opt3);}}); select.onchange=(e)=>{currentUserId=e.target.value; saveState(); renderAll();};}
+    function renderUserProfile(){const user=staffList.find(s=>s.id===currentUserId) || staffList[0]; const casualRemain=(user.leaveBalance?.casualTotal ||21)-(user.leaveBalance?.casualUsed ||0); const medicalRemain=(user.leaveBalance?.medicalTotal ||20)-(user.leaveBalance?.medicalUsed ||0); const container=document.getElementById('userProfileCard'); container.innerHTML=`<div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-lg">${user.nameSinhala.slice(0,2)}</div><div><div class="flex items-center gap-2"><span class="font-bold text-base text-slate-900">${user.nameSinhala}</span><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${user.role==='principal'?'bg-amber-100 text-amber-800':'bg-blue-100 text-blue-800'}">${user.designationSinhala || 'ගුරු'}</span></div><p class="text-xs text-slate-500">සේවා අංකය: ${user.serviceNo} · අංශය: ${user.section || 'General'} · දුරකථන: ${user.phone || '07X-XXXXXXX'}</p></div></div><div class="flex items-center gap-3"><div class="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-center"><div class="text-[10px] text-emerald-700 font-bold">ඉතිරි අනියම් (Casual)</div><div class="text-lg font-black text-emerald-800">${casualRemain} / 21</div></div><div class="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-center"><div class="text-[10px] text-blue-700 font-bold">ඉතිරි විවේක (Medical)</div><div class="text-lg font-black text-blue-800">${medicalRemain} / 20</div></div></div></div>`;}
+    function renderDashboardMetrics(){const today=new Date().toISOString().split('T')[0]; const todayLeaves=leavesList.filter(l=>l.startDate<=today && l.endDate>=today); const approvedLeaves=leavesList.filter(l=>l.status==='approved'); const pendingLeaves=leavesList.filter(l=>l.status==='pending'); const reliefCount=leavesList.filter(l=>l.reliefStaffId).length; document.getElementById('metricTodayLeaves').textContent=todayLeaves.length; document.getElementById('metricApprovedLeaves').textContent=approvedLeaves.length; document.getElementById('metricPendingLeaves').textContent=pendingLeaves.length; document.getElementById('metricReliefDuties').textContent=reliefCount; const tbody=document.getElementById('leavesTableBody'); if(leavesList.length===0){tbody.innerHTML='<tr><td colspan="7" class="p-6 text-center text-slate-400">අද දින සඳහා කිසිදු නිවාඩු වාර්තාවක් නොමැත (සවස 6:00 ස්වයංක්‍රීයව බිංදුව කෙරේ).</td></tr>';} else {tbody.innerHTML=sortedLeaves().map(l=>`<tr class="hover:bg-slate-50"><td class="p-3 font-mono font-bold text-emerald-700">${l.applicationNo}<div class="mt-1">${priorityBadge(l)}</div></td><td class="p-3 font-semibold text-slate-900">${l.staffNameSinhala}</td><td class="p-3 font-medium uppercase text-slate-600">${l.leaveType} (${l.numberOfDays} දින)</td><td class="p-3 text-slate-500">${l.startDate} → ${l.endDate}</td><td class="p-3 text-slate-700 max-w-xs truncate">${l.reason}</td><td class="p-3"><span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${l.status==='approved'?'bg-emerald-100 text-emerald-800': l.status==='rejected'?'bg-rose-100 text-rose-800':'bg-amber-100 text-amber-800'}">${l.status}</span></td><td class="p-3 text-right">${isPrincipalLoggedIn()?`<button onclick="deleteLeave('${l.id}')" class="text-rose-600 hover:text-rose-800 font-bold">ඉවත් කරන්න</button>`:'<span class="text-slate-300">🔒</span>'}</td></tr>`).join('');}}
+    function renderReviewApprovals(){const container=document.getElementById('pendingReviewCards'); const pending=sortedLeaves().filter(l=>l.status==='pending'); if(!isPrincipalLoggedIn()){container.innerHTML='<div class="col-span-2 p-8 text-center bg-amber-50 rounded-2xl border border-amber-200 space-y-3"><div class="text-3xl">🔒</div><div class="text-sm font-bold text-amber-900">අනුමත කිරීම විදුහල්පතිනියට පමණයි</div><div class="text-xs text-amber-800">පොරොත්තු අයදුම්පත් '+pending.length+'ක් ඇත. බැලීමට පිවිසෙන්න.</div><button onclick="openLoginModal()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold">🔐 විදුහල්පති පිවිසුම</button></div>'; return;} if(pending.length===0){container.innerHTML='<div class="col-span-2 text-right"><button onclick="changePin()" class="text-xs text-slate-500 underline">PIN අංකය වෙනස් කරන්න</button></div><div class="col-span-2 p-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">අනුමැතිය සඳහා කිසිදු අයදුම්පතක් පොරොත්තු නොවේ. සියල්ල සම්පූර්ණයි! ✓</div>'; return;} container.innerHTML='<div class="col-span-2 text-right"><button onclick="changePin()" class="text-xs text-slate-500 underline">PIN අංකය වෙනස් කරන්න</button></div>'+pending.map(l=>`<div class="p-4 border border-slate-200 rounded-2xl bg-slate-50 space-y-3"><div class="flex justify-between items-start"><div><div class="font-bold text-slate-900 text-sm">${l.staffNameSinhala}</div><div class="text-[11px] text-emerald-700 font-mono">${l.applicationNo} · ${l.leaveType.toUpperCase()} (${l.numberOfDays} දින)</div></div>${priorityBadge(l)}</div><div class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200"><strong>හේතුව:</strong> ${l.reason} <br><strong>කාල සීමාව:</strong> ${l.startDate} සිට ${l.endDate} දක්වා</div><div class="flex gap-2"><button onclick="approveLeave('${l.id}')" class="flex-1 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs">✓ අනුමත කරන්න</button><button onclick="rejectLeave('${l.id}')" class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-xl font-bold text-xs">✕ ප්‍රතික්ෂේප කරන්න</button></div></div>`).join('');}
+    function renderStaffTable(){const tbody=document.getElementById('staffTableBody'); const term=(document.getElementById('staffSearchInput')?.value || '').toLowerCase(); const filtered=staffList.filter(s => s.nameSinhala.toLowerCase().includes(term) || s.nameEnglish.toLowerCase().includes(term) || s.serviceNo.toLowerCase().includes(term)); tbody.innerHTML=filtered.map((s,idx)=>{const casualRemain=(s.leaveBalance?.casualTotal ||21)-(s.leaveBalance?.casualUsed ||0); const medRemain=(s.leaveBalance?.medicalTotal ||20)-(s.leaveBalance?.medicalUsed ||0); return `<tr class="hover:bg-slate-50"><td class="p-3 font-mono font-bold text-slate-500">${idx+1}. ${s.serviceNo}</td><td class="p-3 font-semibold text-slate-900">${s.nameSinhala}</td><td class="p-3 text-slate-600">${s.designationSinhala || 'ගුරු'} (${s.section || 'General'})</td><td class="p-3 font-bold text-emerald-700">${casualRemain} / 21</td><td class="p-3 font-bold text-blue-700">${medRemain} / 20</td><td class="p-3 font-black text-slate-800">${casualRemain + medRemain} දින</td>${isPrincipalLoggedIn()?`<td class="p-3 text-right whitespace-nowrap"><button onclick="openEditTeacherModal('${s.id}')" class="text-blue-600 hover:text-blue-800 font-bold mr-3">✏️ සංස්කරණය</button>${s.role === 'principal' ? '' : `<button onclick="removeTeacher('${s.id}')" class="text-rose-600 hover:text-rose-800 font-bold">🗑 ඉවත් කරන්න</button>`}</td>`:''}</tr>`;}).join('');}
+    function renderRelief(){const container=document.getElementById('reliefCardsContainer'); const withRelief=leavesList.filter(l=>l.reliefStaffName); if(withRelief.length===0){container.innerHTML='<div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl">දැනට කිසිදු ආවරණ රාජකාරියක් (Relief duty) පවරා නොමැත.</div>'; return;} container.innerHTML=withRelief.map(l=>`<div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-3"><div><div class="font-bold text-slate-900">${l.staffNameSinhala} (නිවාඩු ලබාගත් ගු���ුභවතා)</div><div class="text-xs text-slate-500">දිනය: ${l.startDate} | වර්ගය: ${l.leaveType}</div></div><div class="bg-white border border-emerald-300 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800">ආවරණ ගුරුභවතා: ${l.reliefStaffName}</div></div>`).join('');}
+    function renderReports(){const container=document.getElementById('reportsContainer'); container.innerHTML=`<div class="border border-slate-200 p-5 rounded-2xl space-y-4"><div class="text-center pb-3 border-b border-slate-200"><h3 class="font-black text-base text-slate-900">${SCHOOL_INFO.nameSinhala}</h3><p class="text-xs text-slate-600">මාසික / දෛනික නිවාඩු සාරාංශ වාර්තාව සහ G-35 රාජ්‍ය ලේඛනය</p></div><div class="grid grid-cols-3 gap-3 text-center text-xs"><div class="p-3 bg-slate-50 rounded-xl">මුළු ගුරු සංඛ්‍යාව: <strong>${staffList.length}</strong></div><div class="p-3 bg-slate-50 rounded-xl">මුළු අයදුම්පත්: <strong>${leavesList.length}</strong></div><div class="p-3 bg-slate-50 rounded-xl">අනුමත කළ සංඛ්‍යාව: <strong>${leavesList.filter(l=>l.status==='approved').length}</strong></div></div></div>`;}
+    function sortedLeaves(){return [...leavesList].sort((a,b)=>(a.submittedAt || '').localeCompare(b.submittedAt || ''));}
+    function priorityRank(l){return sortedLeaves().findIndex(x => x.id===l.id)+1;}
+    function priorityBadge(l){const r=priorityRank(l); return r >=1 && r <=4 ? '<span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black">⭐ ප්‍රමුඛතාව '+r+'</span>' : '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold">#'+r+'</span>';}
+    function renderApprovedBanner(){const box=document.getElementById('approvedBannerInner'); const ok=sortedLeaves().filter(l=>l.status==='approved'); const fmt=l => l.startDate===l.endDate ? l.startDate : l.startDate+' → '+l.endDate; box.innerHTML='<span class="font-black text-sm">✅ නිවාඩු අනුමත ගුරුවරු:</span>' + (ok.length ? ok.map(l => '<span class="chip">👤 '+l.staffNameSinhala+' · 📅 '+fmt(l)+'</span>').join('') : '<span class="text-xs text-emerald-100">දැනට අනුමත කළ නිවාඩු නොමැත.</span>');}
+    function renderAll(){renderApprovedBanner(); renderRoleUI(); renderUserSelector(); renderUserProfile(); renderDashboardMetrics(); renderReviewApprovals(); renderStaffTable(); renderRelief(); renderReports();}
+    function openApplyModal(){const today=new Date().toISOString().split('T')[0]; document.getElementById('leaveStartDateInput').value=today; document.getElementById('leaveEndDateInput').value=today; document.getElementById('applyModal').classList.remove('hidden');}
+    function closeApplyModal(){document.getElementById('applyModal').classList.add('hidden');}
+    function handleApplyLeave(e){e.preventDefault(); const applicantId=document.getElementById('leaveFormStaffSelect').value; const applicant=staffList.find(s=>s.id===applicantId); const leaveType=document.getElementById('leaveTypeSelect').value; const days=parseFloat(document.getElementById('leaveDaysInput').value); const startDate=document.getElementById('leaveStartDateInput').value; const endDate=document.getElementById('leaveEndDateInput').value; const reason=document.getElementById('leaveReasonInput').value; const reliefId=document.getElementById('reliefTeacherSelect').value; const reliefTeacher=staffList.find(s=>s.id===reliefId); const newLeave={id:'leave-'+Date.now(), applicationNo:'L/'+new Date().getFullYear()+'/'+Math.floor(1000+Math.random()*9000), staffId:applicantId, staffNameSinhala:applicant ? applicant.nameSinhala : 'ගුරුභවතා', staffNameEnglish:applicant ? applicant.nameEnglish : 'Teacher', leaveType, numberOfDays:days, startDate, endDate, reason, status:'pending', reliefStaffId:reliefId, reliefStaffName:reliefTeacher ? reliefTeacher.nameSinhala : '', submittedAt:new Date().toISOString()}; leavesList.unshift(newLeave); saveState(); closeApplyModal(); showToast('✓ නිවාඩු අයදුම්පත විදුහල්පතිතුමිය වෙත යවන ලදී!'); renderAll();}
+    function approveLeave(id){if(!requirePrincipal()) return; const leave=leavesList.find(l=>l.id===id); if(leave){const earlier=leavesList.filter(x=>x.id !== id && x.status==='pending' && priorityRank(x)<=4); if(priorityRank(leave)>4 && earlier.length && !confirm('ප්‍රමුඛතාව ඇති පළමු අයදුම්කරුවන් '+earlier.length+' දෙනෙකුගේ අයදුම්පත් තවම පොරොත්තුයි. එසේ වුවත් මෙය අනුමත කරන්නද?')) return; leave.status='approved'; const staff=staffList.find(s=>s.id===leave.staffId); if(staff && staff.leaveBalance){if(leave.leaveType==='casual') staff.leaveBalance.casualUsed += leave.numberOfDays; if(leave.leaveType==='medical') staff.leaveBalance.medicalUsed += leave.numberOfDays;} saveState(); showToast('✓ අයදුම්පත අනුමත කරන ලදී.'); renderAll();}}
+    function rejectLeave(id){if(!requirePrincipal()) return; const leave=leavesList.find(l=>l.id===id); if(leave){leave.status='rejected'; saveState(); showToast('අයදුම්පත ප්‍රතික්ෂේප විය.'); renderAll();}}
+    function deleteLeave(id){if(!requirePrincipal()) return; if(confirm('මෙම නිවාඩු වාර්තාව ඉවත් කිරීමට අවශ්‍යද?')){leavesList=leavesList.filter(l=>l.id!==id); saveState(); renderAll();}}
+    function filterStaffTable(){renderStaffTable();}
+    window.addEventListener('DOMContentLoaded',()=>{checkDaily6PMReset(); setInterval(checkDaily6PMReset,30000); renderAll();});
+  </script>
+</body>
+</html>
